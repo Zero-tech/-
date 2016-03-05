@@ -5,6 +5,7 @@ from wechat_sdk.basic import WechatBasic
 from wechat_sdk.messages import (
     TextMessage, VoiceMessage, ImageMessage, VideoMessage, LinkMessage, LocationMessage, EventMessage
 )
+from tulingTest import Tl123, MsgTl123, TextMsgtl123, Tl123Util
 import sys
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -17,6 +18,8 @@ app.debug = True
 def hello():
     return "Hello, world! by Zero-tech"
 
+#实例化全局的图灵机器人
+tl = Tl123();
 #与微信对应的 token数组
 access_token = 'hellozerotech'
 # 实例化 wechat，这是个全局变量
@@ -41,7 +44,8 @@ def responeMessage(type):
 #处理文本消息
 @responeMessage(TextMessage)
 def handleText(message):
-    return wechat.response_text(u'文字')
+    #return wechat.response_text(u'文字')
+    return wechat.response_text(tl.requestMsg(message.content).text)
 
 
 @app.route('/weibo/', methods=['POST', 'GET'])
