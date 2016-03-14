@@ -28,13 +28,14 @@ class Tl123Util:
 class MsgTl123:
     def __init__(self, rspDic):
         try:
-            self.code = str(rspDic['code'])
+            self.code = unicode(rspDic['code'])
             self.text = rspDic['text']
             #print type(self.code), self.code, len(self.code)
             #print Tl123Util.error_code.keys()
             if self.code in Tl123Util.error_code.keys():
                 self.tag = Tl123Util.error_code[self.code]
-            self.tag = Tl123Util.correct_code[self.code]
+            else:
+                self.tag = Tl123Util.correct_code[self.code]
         except Exception, e:
             print 'error ' + e.message
             self.code = '40000'
@@ -118,12 +119,13 @@ class Tl123:
         self.__pData['userid'] = userid
         rsp = requests.post(self.__url, self.__pData)
         rspDic = json.loads(rsp.text)
-        if rspDic['code'] in Tl123Util.error_code.keys():
+        sCode = unicode(rspDic['code'])
+        if sCode in Tl123Util.error_code.keys():
             #返回错误数据
             return MsgTl123(rspDic)
-        if rspDic['code'] is Tl123Util.correct_code_reverse[u'文本']:
+        if sCode == Tl123Util.correct_code_reverse[u'文本']:
             return TextMsgtl123(rspDic)
-        elif rspDic['code'] is Tl123Util.correct_code_reverse[u'链接']:
+        elif sCode == Tl123Util.correct_code_reverse[u'链接']:
             return LinkMsgtl123(rspDic)
         else:
             return MsgTl123(rspDic)
@@ -140,5 +142,5 @@ if __name__ == '__main__':
     '''
     #test packed
     tl = Tl123()
-    msg = tl.requestMsg(u'nicai~')
+    msg = tl.requestMsg(u'nihaoasss')
     print msg.code, msg.text, msg.tag
