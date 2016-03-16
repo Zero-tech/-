@@ -79,6 +79,8 @@ class DbHandler:
     def deviceQuery(self, MAC):
         query = 'select * from Device where MAC=%s'
         n = self.__cursor.execute(query, (MAC))
+        if n <= 0:
+            return None
         return self.__cursor.fetchall()
 
     def deviceQueryByUser(self, userid):
@@ -116,3 +118,14 @@ class DbHandler:
     def close(self):
         self.__cursor.close()
         self.__connect.close()
+
+    def handleInfo(self, info):
+        try:
+            l1 = info.split(',')
+            d = {}
+            for i in l1:
+                j = i.split('=')
+                d[j[0]] = j[1]
+            return d
+        except Exception, ex:
+            return None

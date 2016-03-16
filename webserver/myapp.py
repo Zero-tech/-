@@ -100,17 +100,33 @@ def DeviceServer():
     if request.method == 'GET':
         args = request.args
         mac = args.get('MAC', '')
-        temp = args.get('temp', '')
-        humi = args.get('humi', '')
-        light = args.get('light', '')
+        temp = args.get('Temp', '')
+        humi = args.get('Humi', '')
+        light = args.get('Light', '')
         if mac == '' or temp == '' or humi == '' or light == '':
             return make_response('Wrong Param!')
-        if light == 'on':
+        '''if light == 'on':
             light = 'off'
         else:
             light = 'on'
         print 'yes i got the Device info, that temp is %s, humi is %s, light is %s!'%(temp, humi, light)
-        return make_response('light='+light)
+        return make_response('light='+light)'''
+        handle.connect()
+
+        res = handle.deviceQuery(mac)
+        if(res == None):
+            handle.close()
+            return  make_response(u'Unknow Device!')
+        dInfo = handle.handleInfo(res[0][4])
+        if dInfo == None:
+            handle.close()
+            return make_response(u'Error info!')
+        dInfo['Temp'] = temp
+        dInfo['Humi'] = humi
+
+        handle.deviceUpdateInfo(mac, res[0][1], 'Temp={0},Humi={1},Light={2}'.format(dInfo['Temp'], dInfo['Humi'], dInfo['Light']))
+        handle.close()
+        return make_response('light='+dInfo['Light'])
     else:
         return make_response('Wrong Request Method!')
 
@@ -144,19 +160,19 @@ def handleText(message):
     #return wechat.response_text(u'文字')
     handle.connect()
     rsp = handle.userQuery(message.source)
+    handle.close()
     if rsp != None:
         session = Session(message.source)
         session.state = rsp[0][1]
-        handle.close()
         rspFromSession = handleSession(session, message.content)
         if rspFromSession != u'未知指令':
             return wechat.response_text(rspFromSession)
 
     if message.content == u'绑定设备':
+        handle.connect()
         handle.userInsert(message.source, Session.session_states[0])
         handle.close()
         return wechat.response_text(u'请发送绑定设备的二维码')
-    handle.close()
     return wechat.response_text(tl.requestMsg(message.content).text)
 
 #处理图片消息
